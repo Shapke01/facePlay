@@ -70,7 +70,6 @@ def getTrianglesCoords(img, trianglesIndices=None, detector=detector, predictor=
     return trianglesIndices, trianglesCoords
 
 def mapT2T(src_img, dest_img, src_vertices, dest_vertices):
-
     dest_x, dest_y, dest_w, dest_h = cv2.boundingRect(dest_vertices)
     src_x, src_y, src_w, src_h = cv2.boundingRect(src_vertices)
 
