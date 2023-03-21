@@ -1,5 +1,5 @@
 pip==23.0.1
-opencv
+opencv-python-headless==4.5.5.64
 dlib==19.24.0
 imageio==2.26.1
 imutils==0.5.4
