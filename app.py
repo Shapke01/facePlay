@@ -2,6 +2,7 @@ import cv2
 import streamlit as st
 import numpy as np
 from PIL import Image
+from pyface import Face, put_face_on_image, combine_faces, face_morphing
 
 
 
@@ -22,7 +23,7 @@ names = list()
 
 for face in new_faces:
     names.append(face.name.split('.')[0])
-    faces.append(cv2.resize(np.array(Image.open(face)), (600,400)))
+    faces.append(Face(cv2.resize(np.array(Image.open(face)), (600,400))))
 
 cols = st.columns(max(len(faces),1))
 sliders = [None] * len(faces)
@@ -30,11 +31,19 @@ if len(faces) > 0:
     for idx, (face, col) in enumerate(zip(faces, cols)):
         with col:
             st.markdown(f"<p style='text-align: center; color: white;'>{names[idx]}</p>", unsafe_allow_html=True)
-            st.image(face)
+            st.image(put_face_on_image(face, np.zeros((400, 600, 3), dtype=np.uint8)))
             sliders[idx] = st.slider(str(idx), 0., 1., 0.01, label_visibility='collapsed')
 
+print(sliders)
 
+st.markdown("""---""")
+st.markdown("<h2 style='text-align: center; color: white;'>COMBINED</h2>", unsafe_allow_html=True)
 
+combined = combine_faces(faces=faces, weights=sliders)
+img = put_face_on_image(combined, np.zeros((400, 600, 3), dtype=np.uint8))
+_, col, _ = st.columns([1,2,1])
+with col:
+    st.image(img)
 
 
 
