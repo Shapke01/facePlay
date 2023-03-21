@@ -6,10 +6,9 @@ from pyface import Face, put_face_on_image, combine_faces, face_morphing
 
 
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="centered")
 st.markdown(""" <style>
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
+    footer {visibility: hidden;}
 </style> """, unsafe_allow_html=True)
 
 # TITLE
@@ -36,14 +35,15 @@ if len(faces) > 0:
 
 print(sliders)
 
-st.markdown("""---""")
-st.markdown("<h2 style='text-align: center; color: white;'>COMBINED</h2>", unsafe_allow_html=True)
+if len(faces):
+    st.markdown("""---""")
+    st.markdown("<h2 style='text-align: center; color: white;'>COMBINED</h2>", unsafe_allow_html=True)
 
-combined = combine_faces(faces=faces, weights=sliders)
-img = put_face_on_image(combined, np.zeros((400, 600, 3), dtype=np.uint8))
-_, col, _ = st.columns([1,2,1])
-with col:
-    st.image(img)
+    combined = combine_faces(faces=faces, weights=sliders)
+    img = put_face_on_image(combined, np.zeros((400, 600, 3), dtype=np.uint8))
+    _, col, _ = st.columns([1,2,1])
+    with col:
+        st.image(img)
 
 
 
