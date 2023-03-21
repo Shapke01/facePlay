@@ -1,5 +1,5 @@
 pip==23.0.1
-opencv==4.6.0
+opencv
 dlib==19.24.0
 imageio==2.26.1
 imutils==0.5.4
