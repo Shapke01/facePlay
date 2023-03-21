@@ -1,3 +1,4 @@
+pip==23.0.1
 opencv==4.6.0
 dlib==19.24.0
 imageio==2.26.1
