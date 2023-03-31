@@ -3,8 +3,12 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 from pyface import Face, put_face_on_image, combine_faces, face_morphing
+from pathlib import Path
+import base64
 
-
+my_file = Path("face_morphing.gif")
+if my_file.is_file():
+    my_file.unlink()
 
 st.set_page_config(layout="wide")
 st.markdown(""" <style>
@@ -56,8 +60,20 @@ with right:
             
         if checkboxes.sum() == 2:
             if st.button('Combine checked faces into GIF!'):
+
+                my_file = Path("face_morphing.gif")
+                if my_file.is_file():
+                    my_file.unlink()
+
                 indices = np.where(checkboxes == True)[0]
                 face_morphing([faces[indices[0]], faces[indices[1]]])
+
+            my_file = Path("face_morphing.gif")
+            if my_file.is_file():
+                st.image('face_morphing.gif')
+
+
+
 
 
 
