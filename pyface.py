@@ -6,6 +6,8 @@ from PIL import Image
 import dlib
 from scipy.spatial import Delaunay
 import imageio
+import json
+import copy
 
 
 detector = dlib.get_frontal_face_detector()
@@ -33,19 +35,20 @@ class Face:
         self.trans_tris_image_parts = None
         self.trans_masks = None
 
-        if not self._empty_face(img):
+        if not self._empty_face(img, detector):
             img = cv2.resize(img, (600,400))
 
             rectangle = self._init_rectangle(img, detector)
 
-            self.tris_coords = self._init_tris_coords(img, rectangle, predictor)
-            self.tris_coords_min = self.minimize_coords(self.tris_coords)
-            self.tris_bboxes = self.get_bboxes(self.tris_coords)
-            self.tris_image_parts = self.get_image_parts(image=img)
+            if rectangle:
+                self.tris_coords = self._init_tris_coords(img, rectangle, predictor)
+                self.tris_coords_min = self.minimize_coords(self.tris_coords)
+                self.tris_bboxes = self.get_bboxes(self.tris_coords)
+                self.tris_image_parts = self.get_image_parts(image=img)
 
-            self.transform(self.tris_coords)
+                self.transform(self.tris_coords)
 
-    def _empty_face(self, img):
+    def _empty_face(self, img, detector):
         if type(img) == type(None): 
             return True
         return False
@@ -55,7 +58,7 @@ class Face:
         try:
             assert len(rectangles) == 1
         except:
-            raise AssertionError(f'faces: {len(rectangles)}, expected 1')
+            return None
 
         return rectangles[0]
 
@@ -110,7 +113,54 @@ class Face:
         self.trans_tris_image_parts = parts
         self.trans_masks = masks
 
+    
 
+
+
+
+def save_to(face, path) -> None:
+    tmp_face = copy.deepcopy(face)
+
+    tmp_face.indices = tmp_face.indices.tolist()
+
+    tmp_face.tris_coords = tmp_face.tris_coords.tolist()
+    tmp_face.tris_coords_min = tmp_face.tris_coords_min.tolist()
+    tmp_face.tris_bboxes = tmp_face.tris_bboxes.tolist()
+    tmp_face.tris_image_parts = [x.tolist() for x in tmp_face.tris_image_parts]
+
+    tmp_face.trans_tris_coords = tmp_face.trans_tris_coords.tolist()
+    tmp_face.trans_tris_coords_min = tmp_face.trans_tris_coords_min.tolist()
+    tmp_face.trans_tris_bboxes = tmp_face.trans_tris_bboxes.tolist()
+    tmp_face.trans_tris_image_parts = [x.tolist() for x in tmp_face.trans_tris_image_parts]
+    tmp_face.trans_masks = [x.tolist() for x in tmp_face.trans_masks]
+
+    with open(path, 'w') as outfile:
+        outfile.write(json.dumps(tmp_face.__dict__))
+
+def load_from(path) -> None:
+
+    with open(path) as json_file:
+        data = json.load(json_file)
+
+    tmp_face = Face()
+
+    tmp_face.indices = np.array(data['indices'])
+
+    tmp_face.tris_coords = np.array(data['tris_coords'])
+    tmp_face.tris_coords_min = np.array(data['tris_coords_min'])
+    tmp_face.tris_bboxes = np.array(data['tris_bboxes'])
+    tmp_face.tris_image_parts = data['tris_image_parts']
+    tmp_face.tris_image_parts = [np.array(x) for x in tmp_face.tris_image_parts]
+
+    tmp_face.trans_tris_coords = np.array(data['trans_tris_coords'])
+    tmp_face.trans_tris_coords_min = np.array(data['trans_tris_coords_min'])
+    tmp_face.trans_tris_bboxes = np.array(data['trans_tris_bboxes'])
+    tmp_face.trans_tris_image_parts = data['trans_tris_image_parts']
+    tmp_face.trans_tris_image_parts = [np.array(x) for x in tmp_face.trans_tris_image_parts]
+    tmp_face.trans_masks = data['trans_masks']
+    tmp_face.trans_masks = [np.array(x) for x in tmp_face.trans_masks]
+
+    return tmp_face
 
 def put_face_on_image(face: Face, image):
     trans_parts = face.trans_tris_image_parts
